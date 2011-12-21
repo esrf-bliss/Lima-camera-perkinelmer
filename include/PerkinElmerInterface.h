@@ -21,6 +21,7 @@
 //###########################################################################
 #ifndef PERKINELMERINTERFACE_H
 #define PERKINELMERINTERFACE_H
+#include "Debug.h"
 #include "PerkinElmerCompatibility.h"
 #include "HwInterface.h"
 
@@ -49,21 +50,23 @@ namespace lima
       
       virtual int getNbHwAcquiredFrames();
 
-      static void get_channel_type_n_id(HANDLE& acq_desc,
+      static bool get_channel_type_n_id(HANDLE& acq_desc,
 					const char* &channel_type,
 					int &channel_id);
 
       void newFrameReady();
       void SetEndAcquisition();
     private:
-      void _InitDetector(DWORD &max_columns,DWORD &max_rows);
+      void _InitDetector(unsigned int &max_columns,
+			 unsigned int &max_rows);
 
       HANDLE 		m_acq_desc;
       DetInfoCtrlObj* 	m_det_info;
       SyncCtrlObj*	m_sync;
       SoftBufferCtrlMgr m_buffer_ctrl_mgr;
       bool		m_acq_started;
-      int		m_acq_frame_number;
+      int		m_acq_frame_nb;
+      CapList		m_cap_list;
     };
   }
 }

@@ -20,6 +20,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //###########################################################################
 #include "PerkinElmerSyncCtrlObj.h"
+#include <Acq.h>
+
 using namespace lima;
 using namespace lima::PerkinElmer;
 
@@ -27,7 +29,9 @@ SyncCtrlObj::SyncCtrlObj(HANDLE &acq_desc) :
   m_acq_desc(acq_desc),
   m_trig_mode(IntTrig),
   m_offset_data(NULL),
-  m_gain_data(NULL)
+  m_gain_data(NULL),
+  m_expo_time(-1.),
+  m_acq_nb_frames(1)
 {
 }
 
@@ -83,7 +87,7 @@ void SyncCtrlObj::setExpTime(double exp_time)
     {
       for(selectedReadout = 1;selectedReadout < 7;++selectedReadout)
 	{
-	  int readoutValue = 200 << i;
+	  int readoutValue = 200 << selectedReadout;
 	  if(exp_time < readoutValue * 1e-3) break;
 	}
     }
@@ -96,7 +100,7 @@ void SyncCtrlObj::setExpTime(double exp_time)
   
   if(m_trig_mode != ExtTrigMult)
     {						
-      int expTime = int(exp_time * 1e6);
+      DWORD expTime = DWORD(exp_time * 1e6);
       if(Acquisition_SetTimerSync(m_acq_desc,&expTime) != HIS_ALL_OK)
 	THROW_HW_ERROR(Error) << "Can't change exposition time";
       m_expo_time = expTime / 1e-6;
@@ -107,7 +111,7 @@ void SyncCtrlObj::setExpTime(double exp_time)
 
 void SyncCtrlObj::getExpTime(double& exp_time)
 {
-  exp_time = m_expo_time
+  exp_time = m_expo_time;
 }
 
 void SyncCtrlObj::setLatTime(double lat_time)
@@ -140,6 +144,8 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 
 void SyncCtrlObj::startAcq()
 {
+  DEB_MEMBER_FUNCT();
+
   if(Acquisition_Acquire_Image(m_acq_desc,m_acq_nb_frames,0,
 			       HIS_SEQ_CONTINUOUS, 
 			       m_offset_data,

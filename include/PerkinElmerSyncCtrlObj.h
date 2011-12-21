@@ -20,7 +20,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //###########################################################################
 #ifndef PERKINELMERSYNCCTRLOBJ_H
-#details PERKINELMERSYNCCTRLOBJ_H
+#define PERKINELMERSYNCCTRLOBJ_H
 #include "PerkinElmerCompatibility.h"
 #include "HwSyncCtrlObj.h"
 
@@ -52,10 +52,12 @@ namespace lima
 
       void startAcq();
     private:
-      HANDLE& 	m_acq_desc;
-      TrigMode 	m_trig_mode;
-      int* 	m_offset_data;
-      int* 	m_gain_data;
+      HANDLE& 		m_acq_desc;
+      TrigMode 		m_trig_mode;
+      unsigned short*	m_offset_data;
+      DWORD*		m_gain_data;
+      double		m_expo_time;
+      int		m_acq_nb_frames;
     };
   }
 }

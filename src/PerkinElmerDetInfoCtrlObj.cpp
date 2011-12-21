@@ -20,6 +20,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //###########################################################################
 #include "PerkinElmerDetInfoCtrlObj.h"
+#include "PerkinElmerInterface.h"
+#include <Acq.h>
+
 using namespace lima;
 using namespace lima::PerkinElmer;
 DetInfoCtrlObj::DetInfoCtrlObj(HANDLE &acq_desc,
@@ -42,7 +45,9 @@ void DetInfoCtrlObj::getMaxImageSize(Size& max_image_size)
 void DetInfoCtrlObj::getDetectorImageSize(Size& det_image_size)
 {
   DEB_MEMBER_FUNCT();
-  DWORD dwFrames, dwSortFlags,rows,columns,data_type,sync_mode,dwAcqType,system_id,dwHwAccess;
+  unsigned int dwFrames,dwSortFlags,data_type,rows,columns;
+  BOOL bEnableIRQ;
+  DWORD dwAcqType,system_id,sync_mode,dwHwAccess;
   if(Acquisition_GetConfiguration(m_acq_desc,&dwFrames,
 				  &rows,&columns,&data_type,
 				  &dwSortFlags, &bEnableIRQ, &dwAcqType, 
@@ -79,7 +84,7 @@ void DetInfoCtrlObj::getPixelSize(double& pixel_size)
 
 void DetInfoCtrlObj::getDetectorType(std::string& det_type)
 {
-  det_type = "PerkinElmer"
+  det_type = "PerkinElmer";
 }
 
 void DetInfoCtrlObj::getDetectorModel(std::string& det_model)

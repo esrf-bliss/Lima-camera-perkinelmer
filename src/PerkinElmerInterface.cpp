@@ -20,6 +20,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //###########################################################################
 #include "PerkinElmerInterface.h"
+#include "PerkinElmerDetInfoCtrlObj.h"
+#include "PerkinElmerSyncCtrlObj.h"
 #include <Acq.h>
 
 using namespace lima;
@@ -29,7 +31,7 @@ Interface *theInterface = NULL;
 // CALLBACKS
 void CALLBACK _OnEndAcqCallback(HANDLE)
 {
-  theInterface->SetEndAcquisition()
+  theInterface->SetEndAcquisition();
 }
 
 void CALLBACK _OnEndFrameCallback(HANDLE)
@@ -41,7 +43,9 @@ Interface::Interface() :
   m_acq_desc(NULL),
   m_acq_started(false)
 {
-  DWORD max_columns,max_rows;
+  DEB_MEMBER_FUNCT();
+
+  unsigned int max_columns,max_rows;
   _InitDetector(max_columns,max_rows);
   m_det_info = new DetInfoCtrlObj(m_acq_desc,max_columns,max_rows);
   m_sync = new SyncCtrlObj(m_acq_desc);
@@ -50,6 +54,11 @@ Interface::Interface() :
 					 0, _OnEndFrameCallback, _OnEndAcqCallback) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Could not set callback";
   theInterface = this;
+
+  m_cap_list.push_back(HwCap(m_det_info));
+  m_cap_list.push_back(HwCap(&m_buffer_ctrl_mgr));
+  m_cap_list.push_back(HwCap(m_sync));
+
 }
 
 Interface::~Interface()
@@ -59,7 +68,7 @@ Interface::~Interface()
   delete m_sync;
 }
 
-void Interface::_InitDetector(DWORD &max_columns,DWORD &max_rows);
+void Interface::_InitDetector(unsigned int &max_columns,unsigned int &max_rows)
 {
   DEB_MEMBER_FUNCT();
 
@@ -71,10 +80,10 @@ void Interface::_InitDetector(DWORD &max_columns,DWORD &max_rows);
   if(Acquisition_GetNextSensor(&sensorId,&m_acq_desc) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Can't get detector" << DEB_VAR1(sensorId);
   
-  UINT nChannelType;
   int channel_id;
   const char *channel_type;
-  get_channel_type_n_id(m_acq_desc,channel_type,channel_id)
+  if(!get_channel_type_n_id(m_acq_desc,channel_type,channel_id))
+    THROW_HW_ERROR(Error) << "Can't get channel type and number";
   DEB_ALWAYS() << "Acquisition board:" << DEB_VAR2(channel_type,channel_id);
   
   //Reset Binning
@@ -85,11 +94,13 @@ void Interface::_InitDetector(DWORD &max_columns,DWORD &max_rows);
   if(Acquisition_SetCameraROI(m_acq_desc,0xf) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Can't reset roi";
 
-  DWORD dwFrames,dwSortFlags,data_type,sync_mode,dwAcqType,system_id,dwHwAccess;
+  unsigned int dwFrames,dwSortFlags,data_type;
+  BOOL bEnableIRQ;
+  DWORD dwAcqType,system_id,sync_mode,dwHwAccess;
   if(Acquisition_GetConfiguration(m_acq_desc,&dwFrames,
-				   &max_rows,&max_columns,&data_type,
-				   &dwSortFlags, &bEnableIRQ, &dwAcqType, 
-				   &system_id, &sync_mode, &dwHwAccess) != HIS_ALL_OK)
+				  &max_rows,&max_columns,&data_type,
+				  &dwSortFlags, &bEnableIRQ, &dwAcqType, 
+				  &system_id, &sync_mode, &dwHwAccess) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Can't get detector configuration";
   
   DEB_ALWAYS() << "System Id:" << DEB_VAR1(system_id);
@@ -101,9 +112,7 @@ void Interface::_InitDetector(DWORD &max_columns,DWORD &max_rows);
 
 void Interface::getCapList(CapList &cap_list) const
 {
-  cap_list.push_back(HwCap(m_det_info));
-  cap_list.push_back(HwCap(&m_buffer_ctrl_mgr));
-  cap_list.push_back(HwCap(m_sync));
+  cap_list = m_cap_list;
 }
 
 void Interface::reset(ResetLevel reset_level)
@@ -113,7 +122,9 @@ void Interface::reset(ResetLevel reset_level)
 
 void Interface::prepareAcq()
 {
-  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBufferMgr();
+  DEB_MEMBER_FUNCT();
+
+  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBuffer();
   int nb_buffers;
   buffer_mgr.getNbBuffers(nb_buffers);
   
@@ -131,7 +142,7 @@ void Interface::prepareAcq()
 
 void Interface::startAcq()
 {
-  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBufferMgr();
+  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBuffer();
   buffer_mgr.setStartTimestamp(Timestamp::now());
   m_acq_started = true;
   m_sync->startAcq();
@@ -155,7 +166,7 @@ int Interface::getNbHwAcquiredFrames()
 
 void Interface::newFrameReady()
 {
-  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBufferMgr();
+  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBuffer();
   HwFrameInfoType frame_info;
   frame_info.acq_frame_nb = m_acq_frame_nb;
   bool continueAcq = buffer_mgr.newFrameReady(frame_info);
@@ -171,14 +182,14 @@ void Interface::SetEndAcquisition()
 /*============================================================================
 			   Static Methodes
 ============================================================================*/
-void Interface::get_channel_type_n_id(HANDLE &acq_desc,
+bool Interface::get_channel_type_n_id(HANDLE &acq_desc,
 				      const char* &channel_type,
 				      int &channel_id)
 {
   UINT nChannelType;
 
   if(Acquisition_GetCommChannel(acq_desc,&nChannelType,&channel_id) != HIS_ALL_OK)
-    THROW_HW_ERROR(Error) << "Can't get channel type and channel number";
+    return false;
 
   switch(nChannelType)
     {
@@ -193,4 +204,5 @@ void Interface::get_channel_type_n_id(HANDLE &acq_desc,
     default:
       channel_type = "Unknow";break;
     }
+  return true;
 }
