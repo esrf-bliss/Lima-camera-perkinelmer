@@ -71,7 +71,7 @@
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				AssemblyDebug="0"
-				SubSystem="2"
+				SubSystem="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -100,9 +100,9 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
-			ManagedExtensions="1"
+			ManagedExtensions="0"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -122,11 +122,14 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG"
+				WholeProgramOptimization="false"
+				AdditionalIncludeDirectories="C:\XIS\SDK32;&quot;$(ProjectDir)..\..\..\..\..\..\third-party\Processlib\core\include\&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\third-party\Processlib\core\include\WindowSpecific&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\common\include&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\hardware\include&quot;;&quot;$(ProjectDir)\..\..\..\..\include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_USRDLL;LIBPERKINELMER_EXPORTS;_WIN32_WINNT=0x0502"
+				MinimalRebuild="true"
 				RuntimeLibrary="2"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -139,9 +142,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(NoInherit)"
-				LinkIncremental="1"
+				AdditionalDependencies="c:\xis\sdk32\xisl.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Release\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
+				LinkIncremental="0"
 				GenerateDebugInformation="true"
+				LinkTimeCodeGeneration="0"
 				TargetMachine="1"
 			/>
 			<Tool
