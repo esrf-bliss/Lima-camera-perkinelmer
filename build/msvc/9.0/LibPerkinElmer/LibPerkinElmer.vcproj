@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="LibPerkinElmer"
+	Name="LibLimaPerkinElmer"
 	ProjectGUID="{8F8D18AD-EF95-4AEA-8E4A-62A262FB7C01}"
 	RootNamespace="LibPerkinElmer"
 	Keyword="ManagedCProj"
@@ -66,7 +66,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="false"
 				AdditionalDependencies="c:\xis\sdk32\xisl.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Debug\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Debug\libprocesslib.lib"
-				OutputFile="$(OutDir)\$(ProjectName).dll"
+				OutputFile="$(InputDir)$(IntDir)\$(ProjectName).dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
@@ -143,7 +143,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="c:\xis\sdk32\xisl.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Release\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
-				OutputFile="$(OutDir)\$(ProjectName).dll"
+				OutputFile="$(InputDir)$(IntDir)\$(ProjectName).dll"
 				LinkIncremental="0"
 				GenerateDebugInformation="true"
 				LinkTimeCodeGeneration="0"
