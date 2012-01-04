@@ -49,14 +49,8 @@ namespace lima
       virtual void registerMaxImageSizeCallback(HwMaxImageSizeCallback& cb);
       virtual void unregisterMaxImageSizeCallback(HwMaxImageSizeCallback& cb);
     private:
-      class MaxImageSizeCallbackGen: public HwMaxImageSizeCallbackGen
-      {
-      protected:
-	virtual void setMaxImageSizeCallbackActive(bool cb_active);
-      };
-
     HANDLE& 			m_acq_desc;
-    MaxImageSizeCallbackGen 	m_mis_cb_gen;
+    HwMaxImageSizeCallbackGen 	m_mis_cb_gen;
     int 			m_max_columns;
     int 			m_max_rows;
     };

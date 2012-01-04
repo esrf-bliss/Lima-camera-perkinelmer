@@ -31,6 +31,9 @@ namespace lima
   {
     class DetInfoCtrlObj;
     class SyncCtrlObj;
+    void CALLBACK _OnEndFrameCallback(HANDLE);
+    void CALLBACK _OnEndAcqCallback(HANDLE);
+
     class LIBPERKINELMER_API Interface : public HwInterface
     {
       friend void CALLBACK _OnEndFrameCallback(HANDLE);

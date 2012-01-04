@@ -29,12 +29,12 @@ using namespace lima::PerkinElmer;
 Interface *theInterface = NULL;
 
 // CALLBACKS
-void CALLBACK _OnEndAcqCallback(HANDLE)
+void CALLBACK lima::PerkinElmer::_OnEndAcqCallback(HANDLE)
 {
   theInterface->SetEndAcquisition();
 }
 
-void CALLBACK _OnEndFrameCallback(HANDLE)
+void CALLBACK lima::PerkinElmer::_OnEndFrameCallback(HANDLE)
 {
   theInterface->newFrameReady();
 }
