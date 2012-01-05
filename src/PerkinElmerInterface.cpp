@@ -29,17 +29,20 @@
  
 using namespace lima;
 using namespace lima::PerkinElmer;
-Interface *theInterface = NULL;
 
 // CALLBACKS
-void CALLBACK lima::PerkinElmer::_OnEndAcqCallback(HANDLE)
+void CALLBACK lima::PerkinElmer::_OnEndAcqCallback(HANDLE handle)
 {
-  theInterface->SetEndAcquisition();
+  Interface *anInterfacePt;
+  Acquisition_GetAcqData(handle,(DWORD*)(&anInterfacePt));
+  anInterfacePt->SetEndAcquisition();
 }
 
-void CALLBACK lima::PerkinElmer::_OnEndFrameCallback(HANDLE)
+void CALLBACK lima::PerkinElmer::_OnEndFrameCallback(HANDLE handle)
 {
-  theInterface->newFrameReady();
+   Interface *anInterfacePt;
+  Acquisition_GetAcqData(handle,(DWORD*)(&anInterfacePt));
+  anInterfacePt->newFrameReady();
 }
 // _StopAcq
 class _StopAcq : public SinkTaskBase
@@ -76,7 +79,9 @@ Interface::Interface() :
   if(Acquisition_SetCallbacksAndMessages(m_acq_desc, NULL, 0,
 					 0, _OnEndFrameCallback, _OnEndAcqCallback) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Could not set callback";
-  theInterface = this;
+  
+  if(Acquisition_SetAcqData(m_acq_desc,(DWORD)this) != HIS_ALL_OK)
+    THROW_HW_ERROR(Error) << "Unable to register Acq Data";
 
   m_cap_list.push_back(HwCap(m_det_info));
   m_cap_list.push_back(HwCap(&m_buffer_ctrl_mgr));
