@@ -83,6 +83,8 @@ namespace lima
       CapList		m_cap_list;
       void*		m_tmp_buffer;
       AcqMode		m_acq_mode;
+      unsigned int	m_max_columns;
+      unsigned int	m_max_rows;
     };
     LIBPERKINELMER_API std::ostream& operator <<(std::ostream &os,Interface::CorrMode);
   }

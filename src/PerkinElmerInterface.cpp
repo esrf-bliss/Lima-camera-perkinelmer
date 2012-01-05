@@ -66,17 +66,11 @@ Interface::Interface() :
 {
   DEB_CONSTRUCTOR();
 
-  unsigned int max_columns,max_rows;
-  _InitDetector(max_columns,max_rows);
-  m_det_info = new DetInfoCtrlObj(m_acq_desc,max_columns,max_rows);
+  _InitDetector(m_max_columns,m_max_rows);
+  m_det_info = new DetInfoCtrlObj(m_acq_desc,m_max_columns,m_max_rows);
   m_sync = new SyncCtrlObj(m_acq_desc);
   // TMP Double Buffer
-  m_tmp_buffer = _aligned_malloc(max_columns * max_rows * sizeof(unsigned short) * 2,16);
-  if(Acquisition_DefineDestBuffers(m_acq_desc,
-				   (unsigned short*)m_tmp_buffer,
-				   2,
-				   max_rows,max_columns) != HIS_ALL_OK)
-    THROW_HW_ERROR(Error) << "Unable to register destination buffer";
+  m_tmp_buffer = _aligned_malloc(m_max_columns * m_max_rows * sizeof(unsigned short) * 2,16);
 
   if(Acquisition_SetCallbacksAndMessages(m_acq_desc, NULL, 0,
 					 0, _OnEndFrameCallback, _OnEndAcqCallback) != HIS_ALL_OK)
@@ -155,6 +149,13 @@ void Interface::reset(ResetLevel reset_level)
 void Interface::prepareAcq()
 {
   DEB_MEMBER_FUNCT();
+
+  if(Acquisition_DefineDestBuffers(m_acq_desc,
+				   (unsigned short*)m_tmp_buffer,
+				   2,
+				   m_max_rows,m_max_columns) != HIS_ALL_OK)
+    THROW_HW_ERROR(Error) << "Unable to register destination buffer";
+
   m_acq_frame_nb = 0;
 }
 
@@ -175,8 +176,18 @@ void Interface::stopAcq()
 void Interface::getStatus(StatusType &status)
 {
   DEB_MEMBER_FUNCT();
-  status.set(m_acq_started ? 
+
+  if(m_acq_mode == Normal)
+    {
+      status.set(m_acq_started ? 
 	     HwInterface::StatusType::Exposure : HwInterface::StatusType::Ready);
+    }
+  else
+    {
+      status.set(m_acq_started ?
+		 HwInterface::StatusType::Config : HwInterface::StatusType::Ready);
+    }
+
   DEB_RETURN() << DEB_VAR1(status);
 }
 
@@ -261,14 +272,16 @@ void Interface::startAcqOffsetImage(int nbframes,double time)
   m_acq_mode = Offset;
   m_sync->setExpTime(time);
   m_sync->reallocOffset(image_size);
-      
+  m_acq_started = true;
+
   if(Acquisition_Acquire_OffsetImage(m_acq_desc,
 				     m_sync->m_offset_data,
 				     image_size.getHeight(),
 				     image_size.getWidth(),
 				     nbframes) != HIS_ALL_OK)
     {
-      m_acq_mode = Normal;
+
+      m_acq_mode = Normal,m_acq_started = false;
       THROW_HW_ERROR(Error) << "Could not start acquisition of Offset image";
     }
   m_sync->m_corr_expo_time = time;
@@ -291,6 +304,7 @@ void Interface::startAcqGainImage(int nbframes,double time)
   
   DEB_TRACE() << DEB_VAR2(m_sync->m_offset_data,m_sync->m_gain_data);
 
+  m_acq_started = true;
   if(Acquisition_Acquire_GainImage(m_acq_desc,
 				   m_sync->m_offset_data,
 				   m_sync->m_gain_data,
@@ -298,7 +312,7 @@ void Interface::startAcqGainImage(int nbframes,double time)
 				   image_size.getWidth(),
 				   nbframes) != HIS_ALL_OK)
     {
-      m_acq_mode = Normal;
+      m_acq_mode = Normal,m_acq_started = false;
       THROW_HW_ERROR(Error) << "Could not start acquisition of Gain image";
     }
 }

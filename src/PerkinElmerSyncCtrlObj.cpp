@@ -192,7 +192,7 @@ void SyncCtrlObj::reallocOffset(const Size &aSize)
     }
   if(m_offset_data)
     _aligned_free(m_offset_data);
-  m_offset_data = (unsigned short*)_aligned_malloc(aSize.getWidth() * aSize.getHeight() * sizeof(DWORD),16);
+  m_offset_data = (unsigned short*)_aligned_malloc(aSize.getWidth() * aSize.getHeight() * sizeof(unsigned short),16);
   DEB_TRACE() << DEB_VAR1(m_offset_data);
 }
 
