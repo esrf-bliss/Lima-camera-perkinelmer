@@ -126,6 +126,9 @@ void SyncCtrlObj::getLatTime(double& lat_time)
 
 void SyncCtrlObj::setNbHwFrames(int nb_frames)
 {
+  DEB_MEMBER_FUNCT();
+  DEB_PARAM() << DEB_VAR1(nb_frames);
+
   m_acq_nb_frames = nb_frames;
 }
 
@@ -146,7 +149,7 @@ void SyncCtrlObj::startAcq()
 {
   DEB_MEMBER_FUNCT();
 
-  if(Acquisition_Acquire_Image(m_acq_desc,m_acq_nb_frames,0,
+  if(Acquisition_Acquire_Image(m_acq_desc,2,0,
 			       HIS_SEQ_CONTINUOUS, 
 			       m_offset_data,
 			       m_gain_data,

@@ -24,6 +24,9 @@
 #include "PerkinElmerSyncCtrlObj.h"
 #include <Acq.h>
 
+#include <SinkTask.h>
+#include <TaskMgr.h>
+ 
 using namespace lima;
 using namespace lima::PerkinElmer;
 Interface *theInterface = NULL;
@@ -38,18 +41,38 @@ void CALLBACK lima::PerkinElmer::_OnEndFrameCallback(HANDLE)
 {
   theInterface->newFrameReady();
 }
+// _StopAcq
+class _StopAcq : public SinkTaskBase
+{
+public:
+  _StopAcq(Interface &anInterface) : m_interface(anInterface) {}
+  virtual ~_StopAcq() {}
+  virtual void process(Data&)
+  {
+    m_interface.stopAcq();
+  }
+private:
+  Interface& m_interface;
+};
 
 Interface::Interface() :
   m_acq_desc(NULL),
   m_acq_started(false)
 {
-  DEB_MEMBER_FUNCT();
+  DEB_CONSTRUCTOR();
 
   unsigned int max_columns,max_rows;
   _InitDetector(max_columns,max_rows);
   m_det_info = new DetInfoCtrlObj(m_acq_desc,max_columns,max_rows);
   m_sync = new SyncCtrlObj(m_acq_desc);
-  
+  // TMP Double Buffer
+  m_tmp_buffer = _aligned_malloc(max_columns * max_rows * sizeof(unsigned short) * 2,16);
+  if(Acquisition_DefineDestBuffers(m_acq_desc,
+				   (unsigned short*)m_tmp_buffer,
+				   2,
+				   max_rows,max_columns) != HIS_ALL_OK)
+    THROW_HW_ERROR(Error) << "Unable to register destination buffer";
+
   if(Acquisition_SetCallbacksAndMessages(m_acq_desc, NULL, 0,
 					 0, _OnEndFrameCallback, _OnEndAcqCallback) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Could not set callback";
@@ -66,6 +89,7 @@ Interface::~Interface()
   Acquisition_Close(m_acq_desc);
   delete m_det_info;
   delete m_sync;
+  _aligned_free(m_tmp_buffer);
 }
 
 void Interface::_InitDetector(unsigned int &max_columns,unsigned int &max_rows)
@@ -123,20 +147,6 @@ void Interface::reset(ResetLevel reset_level)
 void Interface::prepareAcq()
 {
   DEB_MEMBER_FUNCT();
-
-  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBuffer();
-  int nb_buffers;
-  buffer_mgr.getNbBuffers(nb_buffers);
-  
-  Size image_size;
-  m_det_info->getDetectorImageSize(image_size);
-
-  if(Acquisition_DefineDestBuffers(m_acq_desc,
-				   (unsigned short*)buffer_mgr.getFrameBufferPtr(0),
-				   nb_buffers,
-				   image_size.getHeight(),
-				   image_size.getWidth()) != HIS_ALL_OK)
-    THROW_HW_ERROR(Error) << "Unable to register destination buffer";
   m_acq_frame_nb = 0;
 }
 
@@ -150,13 +160,16 @@ void Interface::startAcq()
 
 void Interface::stopAcq()
 {
+  DEB_MEMBER_FUNCT();
   Acquisition_Abort(m_acq_desc);
 }
 
 void Interface::getStatus(StatusType &status)
 {
+  DEB_MEMBER_FUNCT();
   status.set(m_acq_started ? 
 	     HwInterface::StatusType::Exposure : HwInterface::StatusType::Ready);
+  DEB_RETURN() << DEB_VAR1(status);
 }
 
 int Interface::getNbHwAcquiredFrames()
@@ -166,16 +179,40 @@ int Interface::getNbHwAcquiredFrames()
 
 void Interface::newFrameReady()
 {
+  DEB_MEMBER_FUNCT();
+  int nb_frame_2_acquire;
+  m_sync->getNbHwFrames(nb_frame_2_acquire);
   StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBuffer();
   HwFrameInfoType frame_info;
   frame_info.acq_frame_nb = m_acq_frame_nb;
-  bool continueAcq = buffer_mgr.newFrameReady(frame_info);
-  ++m_acq_frame_nb;
-  if(!continueAcq) stopAcq();
+  if(!nb_frame_2_acquire || m_acq_frame_nb < nb_frame_2_acquire)
+    { 
+      void* framePt = buffer_mgr.getFrameBufferPtr(m_acq_frame_nb);
+      Size max_image_size;
+      m_det_info->getMaxImageSize(max_image_size);
+      void* srcPt = ((char*)m_tmp_buffer) + ((m_acq_frame_nb & 0x1) * 
+					     max_image_size.getWidth() *
+					     max_image_size.getHeight() *
+					     sizeof(unsigned short));
+      const FrameDim& fDim = buffer_mgr.getFrameDim();
+      memcpy(framePt,srcPt,fDim.getMemSize());
+      bool continueAcq = buffer_mgr.newFrameReady(frame_info);
+      ++m_acq_frame_nb;
+      if(!continueAcq || m_acq_frame_nb == nb_frame_2_acquire)
+	{
+	  _StopAcq *aStopAcqPt = new _StopAcq(*this);
+	  TaskMgr *mgr = new TaskMgr();
+	  mgr->addSinkTask(0,aStopAcqPt);
+	  aStopAcqPt->unref();
+
+	  PoolThreadMgr::get().addProcess(mgr);
+	}
+    }
 }
 
 void Interface::SetEndAcquisition()
 {
+  DEB_MEMBER_FUNCT();
   m_acq_started = false;
 }
 

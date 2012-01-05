@@ -70,6 +70,7 @@ namespace lima
       bool		m_acq_started;
       int		m_acq_frame_nb;
       CapList		m_cap_list;
+      void*		m_tmp_buffer;
     };
   }
 }
