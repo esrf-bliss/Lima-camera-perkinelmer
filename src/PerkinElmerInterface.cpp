@@ -19,6 +19,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //###########################################################################
+#include <cmath>
 #include "PerkinElmerInterface.h"
 #include "PerkinElmerDetInfoCtrlObj.h"
 #include "PerkinElmerSyncCtrlObj.h"
@@ -40,7 +41,7 @@ void CALLBACK lima::PerkinElmer::_OnEndAcqCallback(HANDLE handle)
 
 void CALLBACK lima::PerkinElmer::_OnEndFrameCallback(HANDLE handle)
 {
-   Interface *anInterfacePt;
+  Interface *anInterfacePt;
   Acquisition_GetAcqData(handle,(DWORD*)(&anInterfacePt));
   anInterfacePt->newFrameReady();
 }
@@ -60,7 +61,8 @@ private:
 
 Interface::Interface() :
   m_acq_desc(NULL),
-  m_acq_started(false)
+  m_acq_started(false),
+  m_acq_mode(Normal)
 {
   DEB_CONSTRUCTOR();
 
@@ -147,6 +149,7 @@ void Interface::getCapList(CapList &cap_list) const
 void Interface::reset(ResetLevel reset_level)
 {
   m_acq_started = false;
+  m_acq_mode = Normal;
 }
 
 void Interface::prepareAcq()
@@ -185,6 +188,9 @@ int Interface::getNbHwAcquiredFrames()
 void Interface::newFrameReady()
 {
   DEB_MEMBER_FUNCT();
+  if(m_acq_mode != Normal)	// nothing to do
+    return;
+
   int nb_frame_2_acquire;
   m_sync->getNbHwFrames(nb_frame_2_acquire);
   StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBuffer();
@@ -200,6 +206,7 @@ void Interface::newFrameReady()
 					     max_image_size.getHeight() *
 					     sizeof(unsigned short));
       const FrameDim& fDim = buffer_mgr.getFrameDim();
+      DEB_TRACE() << "memcpy:" << DEB_VAR2(srcPt,framePt);
       memcpy(framePt,srcPt,fDim.getMemSize());
       bool continueAcq = buffer_mgr.newFrameReady(frame_info);
       ++m_acq_frame_nb;
@@ -219,8 +226,82 @@ void Interface::SetEndAcquisition()
 {
   DEB_MEMBER_FUNCT();
   m_acq_started = false;
+  m_acq_mode = Normal;
 }
 
+Interface::CorrMode Interface::getCorrectionMode() const
+{
+  return m_sync->m_corr_mode;
+}
+
+void Interface::setCorrectionMode(Interface::CorrMode aMode)
+{
+  DEB_MEMBER_FUNCT();
+  switch(aMode)
+    {
+    case OffsetAndGain:
+      if(!m_sync->m_gain_data)
+	THROW_HW_ERROR(Error) << "Should acquire gain image correction before";
+    case OffsetOnly:
+      if(!m_sync->m_offset_data)
+	THROW_HW_ERROR(Error) << "Should acquire offset image correction before";
+      break;
+    default:
+      break;
+    }
+  m_sync->m_corr_mode = aMode;
+}
+
+void Interface::startAcqOffsetImage(int nbframes,double time)
+{
+  DEB_MEMBER_FUNCT();
+
+  Size image_size;
+  m_det_info->getDetectorImageSize(image_size);
+  m_acq_mode = Offset;
+  m_sync->setExpTime(time);
+  m_sync->reallocOffset(image_size);
+      
+  if(Acquisition_Acquire_OffsetImage(m_acq_desc,
+				     m_sync->m_offset_data,
+				     image_size.getHeight(),
+				     image_size.getWidth(),
+				     nbframes) != HIS_ALL_OK)
+    {
+      m_acq_mode = Normal;
+      THROW_HW_ERROR(Error) << "Could not start acquisition of Offset image";
+    }
+  m_sync->m_corr_expo_time = time;
+}
+
+void Interface::startAcqGainImage(int nbframes,double time)
+{
+  DEB_MEMBER_FUNCT();
+
+  if(fabs(time - m_sync->m_corr_expo_time) > 1e-6)
+    THROW_HW_ERROR(Error) << "Gain image should be taken with the same time of Offset image";
+  if(!m_sync->m_offset_data)
+    THROW_HW_ERROR(Error) << "Must take Offset image correction before";
+
+  Size image_size;
+  m_det_info->getDetectorImageSize(image_size);
+  m_acq_mode = Gain;
+  m_sync->setExpTime(time);
+  m_sync->reallocGain(image_size);
+  
+  DEB_TRACE() << DEB_VAR2(m_sync->m_offset_data,m_sync->m_gain_data);
+
+  if(Acquisition_Acquire_GainImage(m_acq_desc,
+				   m_sync->m_offset_data,
+				   m_sync->m_gain_data,
+				   image_size.getHeight(),
+				   image_size.getWidth(),
+				   nbframes) != HIS_ALL_OK)
+    {
+      m_acq_mode = Normal;
+      THROW_HW_ERROR(Error) << "Could not start acquisition of Gain image";
+    }
+}
 /*============================================================================
 			   Static Methodes
 ============================================================================*/
@@ -247,4 +328,16 @@ bool Interface::get_channel_type_n_id(HANDLE &acq_desc,
       channel_type = "Unknow";break;
     }
   return true;
+}
+
+std::ostream& lima::PerkinElmer::operator<<(std::ostream &os,Interface::CorrMode aMode)
+{
+  const char *name;
+  switch(aMode)
+    {
+    case Interface::OffsetOnly: name = "Offset correction";break;
+    case Interface::OffsetAndGain: name = "Offset and gain correction";break;
+    default: name = "No Correction";break;
+    }
+  return os << name;
 }

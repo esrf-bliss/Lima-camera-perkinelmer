@@ -19,6 +19,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //###########################################################################
+#include <cmath>
 #include "PerkinElmerSyncCtrlObj.h"
 #include <Acq.h>
 
@@ -31,12 +32,18 @@ SyncCtrlObj::SyncCtrlObj(HANDLE &acq_desc) :
   m_offset_data(NULL),
   m_gain_data(NULL),
   m_expo_time(-1.),
-  m_acq_nb_frames(1)
+  m_acq_nb_frames(1),
+  m_corr_expo_time(-1.)
 {
+  invalidateCorrectionImage();
 }
 
 SyncCtrlObj::~SyncCtrlObj()
 {
+  if(m_offset_data)
+    _aligned_free(m_offset_data);
+  if(m_gain_data)
+    _aligned_free(m_gain_data);
 }
 
 bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
@@ -103,10 +110,14 @@ void SyncCtrlObj::setExpTime(double exp_time)
       DWORD expTime = DWORD(exp_time * 1e6);
       if(Acquisition_SetTimerSync(m_acq_desc,&expTime) != HIS_ALL_OK)
 	THROW_HW_ERROR(Error) << "Can't change exposition time";
-      m_expo_time = expTime / 1e-6;
+      m_expo_time = expTime * 1e-6;
     }
   else
     m_expo_time = exp_time;
+
+  DEB_TRACE() << DEB_VAR2(m_expo_time,m_corr_expo_time);
+  if(fabs(m_expo_time - m_corr_expo_time) > 1e-6)
+    invalidateCorrectionImage();
 }
 
 void SyncCtrlObj::getExpTime(double& exp_time)
@@ -148,12 +159,65 @@ void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 void SyncCtrlObj::startAcq()
 {
   DEB_MEMBER_FUNCT();
+  DEB_TRACE() << DEB_VAR3(m_corr_mode,m_offset_data,m_gain_data);
+  unsigned short* offset_data;
+  if(m_corr_mode != Interface::No)
+    offset_data = m_offset_data;
+  else
+    offset_data = NULL;
+
+  DWORD *gain_data;
+  if(m_corr_mode == Interface::OffsetAndGain)
+    gain_data = m_gain_data;
+  else
+    gain_data = NULL;
 
   if(Acquisition_Acquire_Image(m_acq_desc,2,0,
 			       HIS_SEQ_CONTINUOUS, 
-			       m_offset_data,
-			       m_gain_data,
+			       offset_data,
+			       gain_data,
 			       NULL)!= HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Could not start the acquisition";
   
+}
+
+void SyncCtrlObj::reallocOffset(const Size &aSize)
+{
+  DEB_MEMBER_FUNCT();
+
+  if(m_gain_data)		// Invalidate gain data
+    {
+      _aligned_free(m_gain_data);
+      m_gain_data = NULL;
+    }
+  if(m_offset_data)
+    _aligned_free(m_offset_data);
+  m_offset_data = (unsigned short*)_aligned_malloc(aSize.getWidth() * aSize.getHeight() * sizeof(DWORD),16);
+  DEB_TRACE() << DEB_VAR1(m_offset_data);
+}
+
+void SyncCtrlObj::reallocGain(const Size &aSize)
+{
+  DEB_MEMBER_FUNCT();
+
+  if(m_gain_data)
+    _aligned_free(m_gain_data);
+  m_gain_data = (DWORD*)_aligned_malloc(aSize.getWidth() * aSize.getHeight() * sizeof(DWORD),16);
+  DEB_TRACE() << DEB_VAR1(m_gain_data);
+}
+
+void SyncCtrlObj::invalidateCorrectionImage()
+{
+  if(m_gain_data)
+    {
+      _aligned_free(m_gain_data);
+      m_gain_data = NULL;
+    }
+  if(m_offset_data)
+    {
+      _aligned_free(m_offset_data);
+      m_offset_data = NULL;
+    }
+  m_corr_mode = Interface::No;
+  m_corr_expo_time = -1.;
 }

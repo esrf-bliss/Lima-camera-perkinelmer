@@ -27,7 +27,9 @@ namespace PerkinElmer
 %TypeHeaderCode
 #include <PerkinElmerInterface.h>
 %End
-  public:
+public:
+    enum CorrMode {No,OffsetOnly,OffsetAndGain};
+
     Interface();
     virtual ~Interface();
 
@@ -39,6 +41,12 @@ namespace PerkinElmer
     virtual void getStatus(StatusType& status /Out/);
       
     virtual int getNbHwAcquiredFrames();
+
+    PerkinElmer::Interface::CorrMode getCorrectionMode() const;
+    void setCorrectionMode(PerkinElmer::Interface::CorrMode);
+      
+    void startAcqOffsetImage(int nbframes,double time);
+    void startAcqGainImage(int nbframes,double time);
   };
 };
 

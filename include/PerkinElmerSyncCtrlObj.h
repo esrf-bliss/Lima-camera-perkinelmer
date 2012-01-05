@@ -24,12 +24,14 @@
 #include "PerkinElmerCompatibility.h"
 #include "HwSyncCtrlObj.h"
 
+#include "PerkinElmerInterface.h"
 namespace lima
 {
   namespace PerkinElmer
   {
     class LIBPERKINELMER_API SyncCtrlObj : public HwSyncCtrlObj
     {
+      friend class Interface;
       DEB_CLASS_NAMESPC(DebModCamera, "SyncCtrlObj", "PerkinElmer");
     public:
       SyncCtrlObj(HANDLE&);
@@ -51,13 +53,19 @@ namespace lima
       virtual void getValidRanges(ValidRangesType& valid_ranges);
 
       void startAcq();
+      void reallocOffset(const Size&);
+      void reallocGain(const Size&);
+      void invalidateCorrectionImage();
+
     private:
-      HANDLE& 		m_acq_desc;
-      TrigMode 		m_trig_mode;
-      unsigned short*	m_offset_data;
-      DWORD*		m_gain_data;
-      double		m_expo_time;
-      int		m_acq_nb_frames;
+      HANDLE& 			m_acq_desc;
+      TrigMode 			m_trig_mode;
+      unsigned short*		m_offset_data;
+      DWORD*			m_gain_data;
+      double			m_expo_time;
+      int			m_acq_nb_frames;
+      Interface::CorrMode 	m_corr_mode;
+      double			m_corr_expo_time;
     };
   }
 }

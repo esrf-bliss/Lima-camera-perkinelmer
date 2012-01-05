@@ -40,6 +40,8 @@ namespace lima
       friend void CALLBACK _OnEndAcqCallback(HANDLE);
       DEB_CLASS_NAMESPC(DebModCamera, "Interface", "PerkinElmer");
     public:
+      enum CorrMode {No,OffsetOnly,OffsetAndGain};
+
       Interface();
       virtual ~Interface();
 
@@ -53,6 +55,13 @@ namespace lima
       
       virtual int getNbHwAcquiredFrames();
 
+
+      CorrMode getCorrectionMode() const;
+      void setCorrectionMode(CorrMode);
+
+      void startAcqOffsetImage(int nbframes,double time);
+      void startAcqGainImage(int nbframes,double time);
+
       static bool get_channel_type_n_id(HANDLE& acq_desc,
 					const char* &channel_type,
 					int &channel_id);
@@ -60,6 +69,8 @@ namespace lima
       void newFrameReady();
       void SetEndAcquisition();
     private:
+      enum AcqMode {Normal,Offset,Gain};
+
       void _InitDetector(unsigned int &max_columns,
 			 unsigned int &max_rows);
 
@@ -71,7 +82,9 @@ namespace lima
       int		m_acq_frame_nb;
       CapList		m_cap_list;
       void*		m_tmp_buffer;
+      AcqMode		m_acq_mode;
     };
+    LIBPERKINELMER_API std::ostream& operator <<(std::ostream &os,Interface::CorrMode);
   }
 }
 #endif
