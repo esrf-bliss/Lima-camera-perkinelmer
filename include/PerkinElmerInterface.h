@@ -59,6 +59,9 @@ namespace lima
       CorrMode getCorrectionMode() const;
       void setCorrectionMode(CorrMode);
 
+      int getGain() const;
+      void setGain(int);
+
       void startAcqOffsetImage(int nbframes,double time);
       void startAcqGainImage(int nbframes,double time);
 
@@ -85,6 +88,7 @@ namespace lima
       AcqMode		m_acq_mode;
       unsigned int	m_max_columns;
       unsigned int	m_max_rows;
+      int		m_gain;
     };
     LIBPERKINELMER_API std::ostream& operator <<(std::ostream &os,Interface::CorrMode);
   }

@@ -67,6 +67,7 @@ Interface::Interface() :
   DEB_CONSTRUCTOR();
 
   _InitDetector(m_max_columns,m_max_rows);
+  setGain(0);
   m_det_info = new DetInfoCtrlObj(m_acq_desc,m_max_columns,m_max_rows);
   m_sync = new SyncCtrlObj(m_acq_desc);
   // TMP Double Buffer
@@ -261,6 +262,20 @@ void Interface::setCorrectionMode(Interface::CorrMode aMode)
       break;
     }
   m_sync->m_corr_mode = aMode;
+}
+
+int Interface::getGain() const
+{
+  return m_gain;
+}
+
+void Interface::setGain(int gain)
+{
+  DEB_MEMBER_FUNCT();
+
+  if(Acquisition_SetCameraGain(m_acq_desc,(WORD)gain) != HIS_ALL_OK)
+    THROW_HW_ERROR(Error) << "Could not set gain";
+  m_gain = gain;
 }
 
 void Interface::startAcqOffsetImage(int nbframes,double time)

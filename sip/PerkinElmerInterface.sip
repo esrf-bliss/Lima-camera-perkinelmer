@@ -44,6 +44,9 @@ public:
 
     PerkinElmer::Interface::CorrMode getCorrectionMode() const;
     void setCorrectionMode(PerkinElmer::Interface::CorrMode);
+
+    int getGain() const;
+    void setGain(int);
       
     void startAcqOffsetImage(int nbframes,double time);
     void startAcqGainImage(int nbframes,double time);
