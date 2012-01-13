@@ -62,7 +62,8 @@ private:
 Interface::Interface() :
   m_acq_desc(NULL),
   m_acq_started(false),
-  m_acq_mode(Normal)
+  m_acq_mode(Normal),
+  m_first_thrown(false)
 {
   DEB_CONSTRUCTOR();
 
@@ -158,6 +159,7 @@ void Interface::prepareAcq()
     THROW_HW_ERROR(Error) << "Unable to register destination buffer";
 
   m_acq_frame_nb = 0;
+  m_first_thrown = false;
 }
 
 void Interface::startAcq()
@@ -203,6 +205,12 @@ void Interface::newFrameReady()
   if(m_acq_mode != Normal)	// nothing to do
     return;
 
+  if(!m_first_thrown)		// throw first image
+    {
+      m_first_thrown = true;
+      return;
+    }
+
   int nb_frame_2_acquire;
   m_sync->getNbHwFrames(nb_frame_2_acquire);
   StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBuffer();
@@ -210,7 +218,7 @@ void Interface::newFrameReady()
   frame_info.acq_frame_nb = m_acq_frame_nb;
   if(!nb_frame_2_acquire || m_acq_frame_nb < nb_frame_2_acquire)
     { 
-      void* framePt = buffer_mgr.getFrameBufferPtr(m_acq_frame_nb);
+      void* framePt = buffer_mgr.getFrameBufferPtr(m_acq_frame_nb++);
       Size max_image_size;
       m_det_info->getMaxImageSize(max_image_size);
       void* srcPt = ((char*)m_tmp_buffer) + ((m_acq_frame_nb & 0x1) * 
@@ -221,7 +229,6 @@ void Interface::newFrameReady()
       DEB_TRACE() << "memcpy:" << DEB_VAR2(srcPt,framePt);
       memcpy(framePt,srcPt,fDim.getMemSize());
       bool continueAcq = buffer_mgr.newFrameReady(frame_info);
-      ++m_acq_frame_nb;
       if(!continueAcq || m_acq_frame_nb == nb_frame_2_acquire)
 	{
 	  _StopAcq *aStopAcqPt = new _StopAcq(*this);

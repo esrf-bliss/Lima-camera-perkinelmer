@@ -89,6 +89,7 @@ namespace lima
       unsigned int	m_max_columns;
       unsigned int	m_max_rows;
       int		m_gain;
+      bool		m_first_thrown;
     };
     LIBPERKINELMER_API std::ostream& operator <<(std::ostream &os,Interface::CorrMode);
   }
