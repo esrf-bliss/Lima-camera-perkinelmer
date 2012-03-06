@@ -80,7 +80,7 @@ namespace lima
       HANDLE 		m_acq_desc;
       DetInfoCtrlObj* 	m_det_info;
       SyncCtrlObj*	m_sync;
-      SoftBufferCtrlMgr m_buffer_ctrl_mgr;
+      SoftBufferCtrlObj m_buffer_ctrl_obj;
       bool		m_acq_started;
       int		m_acq_frame_nb;
       CapList		m_cap_list;

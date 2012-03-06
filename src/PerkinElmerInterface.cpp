@@ -82,7 +82,7 @@ Interface::Interface() :
     THROW_HW_ERROR(Error) << "Unable to register Acq Data";
 
   m_cap_list.push_back(HwCap(m_det_info));
-  m_cap_list.push_back(HwCap(&m_buffer_ctrl_mgr));
+  m_cap_list.push_back(HwCap(&m_buffer_ctrl_obj));
   m_cap_list.push_back(HwCap(m_sync));
 
 }
@@ -164,7 +164,7 @@ void Interface::prepareAcq()
 
 void Interface::startAcq()
 {
-  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBuffer();
+  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_obj.getBuffer();
   buffer_mgr.setStartTimestamp(Timestamp::now());
   m_acq_started = true;
   m_sync->startAcq();
@@ -213,7 +213,7 @@ void Interface::newFrameReady()
 
   int nb_frame_2_acquire;
   m_sync->getNbHwFrames(nb_frame_2_acquire);
-  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_mgr.getBuffer();
+  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_obj.getBuffer();
   HwFrameInfoType frame_info;
   frame_info.acq_frame_nb = m_acq_frame_nb;
   if(!nb_frame_2_acquire || m_acq_frame_nb < nb_frame_2_acquire)
