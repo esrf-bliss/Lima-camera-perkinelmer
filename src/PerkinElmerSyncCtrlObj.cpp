@@ -132,7 +132,7 @@ void SyncCtrlObj::setLatTime(double lat_time)
 
 void SyncCtrlObj::getLatTime(double& lat_time)
 {
-  lat_time = 134e-3;		// Readout
+  lat_time = 0;		// Readout
 }
 
 void SyncCtrlObj::setNbHwFrames(int nb_frames)
@@ -150,10 +150,10 @@ void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
-  valid_ranges.min_exp_time = 134e-3;
+  valid_ranges.min_exp_time = 33.2e-3;
   valid_ranges.max_exp_time = 5.;
-  valid_ranges.min_lat_time = 134e-3;
-  valid_ranges.max_lat_time = 134e-3;
+  valid_ranges.min_lat_time = 0.;
+  valid_ranges.max_lat_time = 0.;
 }
 
 void SyncCtrlObj::startAcq()
