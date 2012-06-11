@@ -31,6 +31,7 @@ namespace lima
   {
     class DetInfoCtrlObj;
     class SyncCtrlObj;
+    class BinCtrlObj;
     void CALLBACK _OnEndFrameCallback(HANDLE);
     void CALLBACK _OnEndAcqCallback(HANDLE);
 
@@ -80,6 +81,7 @@ namespace lima
       HANDLE 		m_acq_desc;
       DetInfoCtrlObj* 	m_det_info;
       SyncCtrlObj*	m_sync;
+      BinCtrlObj*	m_bin;
       SoftBufferCtrlObj m_buffer_ctrl_obj;
       bool		m_acq_started;
       int		m_acq_frame_nb;

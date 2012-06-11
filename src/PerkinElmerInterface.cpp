@@ -23,6 +23,7 @@
 #include "PerkinElmerInterface.h"
 #include "PerkinElmerDetInfoCtrlObj.h"
 #include "PerkinElmerSyncCtrlObj.h"
+#include "PerkinElmerBinCtrlObj.h"
 #include <Acq.h>
 
 #include <SinkTask.h>
@@ -71,6 +72,7 @@ Interface::Interface() :
   setGain(0);
   m_det_info = new DetInfoCtrlObj(m_acq_desc,m_max_columns,m_max_rows);
   m_sync = new SyncCtrlObj(m_acq_desc);
+  m_bin = new BinCtrlObj(m_acq_desc);
   // TMP Double Buffer
   m_tmp_buffer = _aligned_malloc(m_max_columns * m_max_rows * sizeof(unsigned short) * 2,16);
 
@@ -84,7 +86,7 @@ Interface::Interface() :
   m_cap_list.push_back(HwCap(m_det_info));
   m_cap_list.push_back(HwCap(&m_buffer_ctrl_obj));
   m_cap_list.push_back(HwCap(m_sync));
-
+  m_cap_list.push_back(HwCap(m_bin));
 }
 
 Interface::~Interface()
@@ -112,7 +114,7 @@ void Interface::_InitDetector(unsigned int &max_columns,unsigned int &max_rows)
   if(!get_channel_type_n_id(m_acq_desc,channel_type,channel_id))
     THROW_HW_ERROR(Error) << "Can't get channel type and number";
   DEB_ALWAYS() << "Acquisition board:" << DEB_VAR2(channel_type,channel_id);
-  
+
   //Reset Binning
   if(Acquisition_SetCameraBinningMode(m_acq_desc,1) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Can't reset the Binning";
@@ -152,10 +154,13 @@ void Interface::prepareAcq()
 {
   DEB_MEMBER_FUNCT();
 
+  StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_obj.getBuffer();
+  const Size& aSize = buffer_mgr.getFrameDim().getSize();
+
   if(Acquisition_DefineDestBuffers(m_acq_desc,
 				   (unsigned short*)m_tmp_buffer,
 				   2,
-				   m_max_rows,m_max_columns) != HIS_ALL_OK)
+				   aSize.getHeight(),aSize.getWidth()) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Unable to register destination buffer";
 
   m_acq_frame_nb = 0;
