@@ -164,9 +164,7 @@ void Interface::prepareAcq()
     THROW_HW_ERROR(Error) << "Unable to register destination buffer";
 
   m_acq_frame_nb = 0;
-  TrigMode current_trig_mode;
-  m_sync->getTrigMode(current_trig_mode);
-  m_first_thrown = current_trig_mode != ExtStartStop;
+  m_first_thrown = false;
 }
 
 void Interface::startAcq()
