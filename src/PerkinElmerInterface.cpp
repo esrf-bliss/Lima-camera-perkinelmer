@@ -163,7 +163,7 @@ void Interface::prepareAcq()
 				   aSize.getHeight(),aSize.getWidth()) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Unable to register destination buffer";
 
-  m_acq_frame_nb = 0;
+  m_total_acq_frames = m_acq_frame_nb = 0;
   m_first_thrown = false;
 }
 
@@ -215,6 +215,14 @@ void Interface::newFrameReady()
       m_first_thrown = true;
       return;
     }
+  TrigMode aCurrentMode;
+  m_sync->getTrigMode(aCurrentMode);
+  if(aCurrentMode == ExtStartStop)
+    {
+      ++m_total_acq_frames;
+      if(!(m_total_acq_frames & 0x1))  // we keep odd frame
+	return;
+    }
 
   int nb_frame_2_acquire;
   m_sync->getNbHwFrames(nb_frame_2_acquire);
@@ -224,13 +232,9 @@ void Interface::newFrameReady()
   if(!nb_frame_2_acquire || m_acq_frame_nb < nb_frame_2_acquire)
     { 
       void* framePt = buffer_mgr.getFrameBufferPtr(m_acq_frame_nb++);
-      Size max_image_size;
-      m_det_info->getMaxImageSize(max_image_size);
-      void* srcPt = ((char*)m_tmp_buffer) + ((m_acq_frame_nb & 0x1) * 
-					     max_image_size.getWidth() *
-					     max_image_size.getHeight() *
-					     sizeof(unsigned short));
       const FrameDim& fDim = buffer_mgr.getFrameDim();
+      int bufferNb = aCurrentMode == ExtStartStop ? 1 : (m_acq_frame_nb & 0x1);
+      void* srcPt = ((char*)m_tmp_buffer) + (bufferNb * fDim.getMemSize());
       DEB_TRACE() << "memcpy:" << DEB_VAR2(srcPt,framePt);
       memcpy(framePt,srcPt,fDim.getMemSize());
       bool continueAcq = buffer_mgr.newFrameReady(frame_info);

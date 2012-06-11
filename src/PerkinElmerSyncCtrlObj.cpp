@@ -52,8 +52,8 @@ bool SyncCtrlObj::checkTrigMode(TrigMode trig_mode)
   switch (trig_mode)
     {
     case IntTrig:
-    case IntTrigMult:
     case ExtStartStop:
+    case ExtTrigReadout:
       valid_mode = true;
       break;
 
@@ -70,6 +70,7 @@ void SyncCtrlObj::setTrigMode(TrigMode trig_mode)
   DWORD trigMode;
   switch(trig_mode)
     {
+    case ExtTrigReadout:
     case ExtStartStop:
       trigMode = HIS_SYNCMODE_EXTERNAL_TRIGGER;break;
     default:
@@ -105,7 +106,7 @@ void SyncCtrlObj::setExpTime(double exp_time)
   if(Acquisition_SetCameraMode(m_acq_desc,selectedReadout) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Can't change readout time";
   
-  if(m_trig_mode != ExtStartStop)
+  if(m_trig_mode == IntTrig)
     {						
       DWORD expTime = DWORD(exp_time * 1e6);
       if(Acquisition_SetTimerSync(m_acq_desc,&expTime) != HIS_ALL_OK)
