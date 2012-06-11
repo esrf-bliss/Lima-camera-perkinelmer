@@ -90,22 +90,6 @@ void SyncCtrlObj::getTrigMode(TrigMode& trig_mode)
 void SyncCtrlObj::setExpTime(double exp_time)
 {
   DEB_MEMBER_FUNCT();
-  UINT selectedReadout;
-  if(exp_time >= 200e-3)
-    {
-      for(selectedReadout = 1;selectedReadout < 7;++selectedReadout)
-	{
-	  int readoutValue = 200 << selectedReadout;
-	  if(exp_time < readoutValue * 1e-3) break;
-	}
-    }
-  else
-    selectedReadout = 0;
-
-  DEB_TRACE() << DEB_VAR1(selectedReadout);
-  if(Acquisition_SetCameraMode(m_acq_desc,selectedReadout) != HIS_ALL_OK)
-    THROW_HW_ERROR(Error) << "Can't change readout time";
-  
   if(m_trig_mode == IntTrig)
     {						
       DWORD expTime = DWORD(exp_time * 1e6);
