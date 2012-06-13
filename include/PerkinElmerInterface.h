@@ -72,6 +72,9 @@ namespace lima
 
       void newFrameReady();
       void SetEndAcquisition();
+
+      void setKeepFirstImage(bool);
+      bool getKeepFirstImage() const;
     private:
       enum AcqMode {Normal,Offset,Gain};
 

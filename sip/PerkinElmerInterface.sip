@@ -50,6 +50,9 @@ public:
       
     void startAcqOffsetImage(int nbframes,double time);
     void startAcqGainImage(int nbframes,double time);
+
+    void setKeepFirstImage(bool);
+    bool getKeepFirstImage() const;
   };
 };
 

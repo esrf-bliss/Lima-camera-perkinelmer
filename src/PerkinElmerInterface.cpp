@@ -169,6 +169,9 @@ void Interface::prepareAcq()
 
 void Interface::startAcq()
 {
+  double expo_time;
+  m_sync->getExpTime(expo_time);
+  m_sync->_setExpTime(expo_time,m_sync->m_keep_first_image);
   StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_obj.getBuffer();
   buffer_mgr.setStartTimestamp(Timestamp::now());
   m_acq_started = true;
@@ -179,6 +182,7 @@ void Interface::stopAcq()
 {
   DEB_MEMBER_FUNCT();
   Acquisition_Abort(m_acq_desc);
+  m_sync->_setExpTimeToMin();
 }
 
 void Interface::getStatus(StatusType &status)
@@ -210,7 +214,8 @@ void Interface::newFrameReady()
   if(m_acq_mode != Normal)	// nothing to do
     return;
 
-  if(!m_first_thrown)		// throw first image
+  if(!m_first_thrown &&			// throw first image
+     !m_sync->m_keep_first_image)	// if we don't want it
     {
       m_first_thrown = true;
       return;
@@ -231,9 +236,11 @@ void Interface::newFrameReady()
   frame_info.acq_frame_nb = m_acq_frame_nb;
   if(!nb_frame_2_acquire || m_acq_frame_nb < nb_frame_2_acquire)
     { 
-      void* framePt = buffer_mgr.getFrameBufferPtr(m_acq_frame_nb++);
+      void* framePt = buffer_mgr.getFrameBufferPtr(m_acq_frame_nb);
+      int bufferid = m_sync->m_keep_first_image ? m_acq_frame_nb++ : ++m_acq_frame_nb;
       const FrameDim& fDim = buffer_mgr.getFrameDim();
-      int bufferNb = aCurrentMode == ExtStartStop ? 1 : (m_acq_frame_nb & 0x1);
+      int bufferNb = aCurrentMode == ExtStartStop ? 
+	int(!m_sync->m_keep_first_image) : (bufferid & 0x1);
       void* srcPt = ((char*)m_tmp_buffer) + (bufferNb * fDim.getMemSize());
       DEB_TRACE() << "memcpy:" << DEB_VAR2(srcPt,framePt);
       memcpy(framePt,srcPt,fDim.getMemSize());
@@ -255,6 +262,23 @@ void Interface::SetEndAcquisition()
   DEB_MEMBER_FUNCT();
   m_acq_started = false;
   m_acq_mode = Normal;
+}
+
+void Interface::setKeepFirstImage(bool aFlag)
+{
+  m_sync->m_keep_first_image = aFlag;
+  //hard expo time sync
+  if(!aFlag)
+    {
+      double expo_time;
+      m_sync->getExpTime(expo_time);
+      m_sync->_setExpTime(expo_time,true);
+    }
+}
+
+bool Interface::getKeepFirstImage() const
+{
+  return m_sync->m_keep_first_image;
 }
 
 Interface::CorrMode Interface::getCorrectionMode() const

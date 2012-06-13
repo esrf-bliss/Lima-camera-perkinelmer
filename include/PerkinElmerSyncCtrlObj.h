@@ -58,6 +58,9 @@ namespace lima
       void invalidateCorrectionImage();
 
     private:
+      void _setExpTime(double exp_time,bool send_to_hard);
+      void _setExpTimeToMin();
+
       HANDLE& 			m_acq_desc;
       TrigMode 			m_trig_mode;
       unsigned short*		m_offset_data;
@@ -66,6 +69,7 @@ namespace lima
       int			m_acq_nb_frames;
       Interface::CorrMode 	m_corr_mode;
       double			m_corr_expo_time;
+      bool			m_keep_first_image;
     };
   }
 }

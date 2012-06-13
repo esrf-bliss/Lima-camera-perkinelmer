@@ -26,6 +26,8 @@
 using namespace lima;
 using namespace lima::PerkinElmer;
 
+const double MIN_EXPO_TIME = 33.2e-3;
+
 SyncCtrlObj::SyncCtrlObj(HANDLE &acq_desc) :
   m_acq_desc(acq_desc),
   m_trig_mode(IntTrig),
@@ -33,7 +35,8 @@ SyncCtrlObj::SyncCtrlObj(HANDLE &acq_desc) :
   m_gain_data(NULL),
   m_expo_time(-1.),
   m_acq_nb_frames(1),
-  m_corr_expo_time(-1.)
+  m_corr_expo_time(-1.),
+  m_keep_first_image(false)
 {
   invalidateCorrectionImage();
 }
@@ -89,8 +92,12 @@ void SyncCtrlObj::getTrigMode(TrigMode& trig_mode)
 
 void SyncCtrlObj::setExpTime(double exp_time)
 {
+  _setExpTime(exp_time,!m_keep_first_image);
+}
+void SyncCtrlObj::_setExpTime(double exp_time,bool send_to_hard)
+{
   DEB_MEMBER_FUNCT();
-  if(m_trig_mode == IntTrig)
+  if(m_trig_mode == IntTrig && send_to_hard)
     {						
       DWORD expTime = DWORD(exp_time * 1e6);
       if(Acquisition_SetTimerSync(m_acq_desc,&expTime) != HIS_ALL_OK)
@@ -104,7 +111,14 @@ void SyncCtrlObj::setExpTime(double exp_time)
   if(fabs(m_expo_time - m_corr_expo_time) > 1e-6)
     invalidateCorrectionImage();
 }
-
+void SyncCtrlObj::_setExpTimeToMin()
+{
+  if(m_trig_mode == IntTrig && m_keep_first_image)
+    {
+      DWORD expTime = DWORD(MIN_EXPO_TIME * 1e6);
+      Acquisition_SetTimerSync(m_acq_desc,&expTime);
+    }
+}
 void SyncCtrlObj::getExpTime(double& exp_time)
 {
   exp_time = m_expo_time;
@@ -135,7 +149,7 @@ void SyncCtrlObj::getNbHwFrames(int& nb_frames)
 
 void SyncCtrlObj::getValidRanges(ValidRangesType& valid_ranges)
 {
-  valid_ranges.min_exp_time = 33.2e-3;
+  valid_ranges.min_exp_time = MIN_EXPO_TIME;
   valid_ranges.max_exp_time = 5.;
   valid_ranges.min_lat_time = 0.;
   valid_ranges.max_lat_time = 0.;
