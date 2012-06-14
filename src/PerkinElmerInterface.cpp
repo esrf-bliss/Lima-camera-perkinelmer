@@ -312,7 +312,8 @@ int Interface::getGain() const
 void Interface::setGain(int gain)
 {
   DEB_MEMBER_FUNCT();
-
+  if(gain < 0 || gain > 0x3f)
+    THROW_HW_ERROR(Error) << "Gain can be between 0 and 63";
   if(Acquisition_SetCameraGain(m_acq_desc,(WORD)gain) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Could not set gain";
   m_gain = gain;
