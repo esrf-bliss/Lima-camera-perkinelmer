@@ -7,6 +7,8 @@ Intoduction
 ```````````
 PerkinElmer is a world leader in the design, development, and manufacture of Amorphous Silicon (aSi) Flat Panel Detectors (FPD) designed to perform across a wide range of medical, veterinary, and industrial, Non-Destructive Testing (NDT) applications. Our XRD family of detectors provide superior image resolution, high frame rates up to 30 frames per seconds (fps), energy levels form 20 keV -15 MeV and easy information storage and retrieval.
 
+The detector model we tested (ESRF) is : XRD 1621 CN ES
+ 
 Module configuration
 ````````````````````
 Previously to this you have to install the Perkinelmer SDK to the default path
