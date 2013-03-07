@@ -70,7 +70,7 @@ Interface::Interface() :
 
   _InitDetector(m_max_columns,m_max_rows);
   setGain(0);
-  m_det_info = new DetInfoCtrlObj(m_acq_desc,m_max_columns,m_max_rows);
+  m_det_info = new DetInfoCtrlObj(m_acq_desc,m_max_rows,m_max_columns);
   m_sync = new SyncCtrlObj(m_acq_desc);
   m_bin = new BinCtrlObj(m_acq_desc);
   // TMP Double Buffer
