@@ -119,10 +119,6 @@ void Interface::_InitDetector(unsigned int &max_columns,unsigned int &max_rows)
   if(Acquisition_SetCameraBinningMode(m_acq_desc,1) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Can't reset the Binning";
 
-  //Reset Roi
-  if(Acquisition_SetCameraROI(m_acq_desc,0xf) != HIS_ALL_OK)
-    THROW_HW_ERROR(Error) << "Can't reset roi";
-
   unsigned int dwFrames,dwSortFlags,data_type;
   BOOL bEnableIRQ;
   DWORD dwAcqType,system_id,sync_mode,dwHwAccess;
