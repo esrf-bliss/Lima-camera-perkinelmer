@@ -51,7 +51,7 @@ void BinCtrlObj::getBin(Bin& bin)
 {
   WORD binMode;
   Acquisition_GetCameraBinningMode(m_acq_desc,&binMode);
-  if(binMode)
+  if(binMode == 2)
     bin = Bin(2,2);
   else
     bin = Bin(1,1);
