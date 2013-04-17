@@ -391,7 +391,7 @@ bool Interface::get_channel_type_n_id(HANDLE &acq_desc,
     case HIS_BOARD_TYPE_ELTEC_GbIF:
       channel_type = "GigabitEthernet";break;
     default:
-      channel_type = "Unknow";break;
+      channel_type = "Unknown";break;
     }
   return true;
 }
