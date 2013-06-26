@@ -123,7 +123,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="C:\XIS\SDK32;&quot;$(ProjectDir)..\..\..\..\..\..\third-party\Processlib\core\include\&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\third-party\Processlib\core\include\WindowSpecific&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\common\include&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\hardware\include&quot;;&quot;$(ProjectDir)\..\..\..\..\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(XIS_ROOT)\SDK32&quot;;C:\XIS\SDK32;&quot;$(ProjectDir)..\..\..\..\..\..\third-party\Processlib\core\include\&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\third-party\Processlib\core\include\WindowSpecific&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\common\include&quot;;&quot;$(ProjectDir)..\..\..\..\..\..\hardware\include&quot;;&quot;$(ProjectDir)\..\..\..\..\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_USRDLL;LIBPERKINELMER_EXPORTS;_WIN32_WINNT=0x0502"
 				MinimalRebuild="true"
 				RuntimeLibrary="2"
@@ -142,9 +142,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="c:\xis\sdk32\xisl.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Release\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
+				AdditionalDependencies="xisl.lib $(InputDir)..\..\..\..\..\..\build\msvc\9.0\LimaCore\Release\liblimacore.lib $(InputDir)..\..\..\..\..\..\third-party\Processlib\build\msvc\9.0\libprocesslib\Release\libprocesslib.lib"
 				OutputFile="$(InputDir)$(IntDir)\$(ProjectName).dll"
 				LinkIncremental="0"
+				AdditionalLibraryDirectories="&quot;$(XIS_ROOT)\SDK32\&quot;;c:\XIS\SDK32"
 				GenerateDebugInformation="true"
 				LinkTimeCodeGeneration="0"
 				TargetMachine="1"
