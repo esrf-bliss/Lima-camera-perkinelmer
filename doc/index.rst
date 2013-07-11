@@ -1,7 +1,11 @@
+.. toctree::
+  :maxdepth: 3
+
 Perkin Elmer
 ------------
 
 .. image:: perkinelmer.png
+   :scale: 50
 
 Intoduction
 ```````````
