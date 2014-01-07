@@ -12,7 +12,7 @@
 	<version>1.3.0-SNAPSHOT</version>
 
     <packaging>nar</packaging>
-    <name>LimaPerkinElmer</name>    <!-- use for the name of executable -->
+    <name>LimaPerkinElmer</name>
     <description>This module controls the PerkinElmer Camera</description>
 	
 	<properties>
@@ -46,7 +46,7 @@
 							<define>NDEBUG</define>
 							<define>_WINDOWS</define>
 							<define>_USRDLL</define>
-							<define>_WIN32_WINNT=0x0502</define> <!-- Windows XP -->
+							<define>_WIN32_WINNT=0x0502</define> <!-- For Windows XP Support -->
 						</defines>
 					</cpp>
 					<linker>
