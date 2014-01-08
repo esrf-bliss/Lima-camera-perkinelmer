@@ -38,7 +38,7 @@
 						<sourceDirectory>src</sourceDirectory>
 						<includePaths>
 							<includePath>include</includePath>
-							<includePath>T:\LimaCompilWin32\XIS/SDK32</includePath>
+							<includePath>sdk/msvc/include</includePath>
 						</includePaths>
 						<defines>
 							<define>LIBPERKINELMER_EXPORTS</define>
@@ -54,7 +54,7 @@
 							<lib>
 								<name>xisl</name>
 								<type>static</type>
-								<directory>T:\LimaCompilWin32\XIS/SDK32</directory>
+								<directory>sdk/msvc/bin</directory>
 							</lib>
 						</libs>
 					</linker>
