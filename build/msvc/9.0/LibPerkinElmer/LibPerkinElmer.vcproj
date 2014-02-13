@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="LibLimaPerkinElmer"
-	ProjectGUID="{8F8D18AD-EF95-4AEA-8E4A-62A262FB7C01}"
+	ProjectGUID="{F21E8C5B-7543-4A4C-9459-5C43FE5C84F2}"
 	RootNamespace="LibPerkinElmer"
 	Keyword="ManagedCProj"
 	TargetFrameworkVersion="196613"
