@@ -15,10 +15,6 @@
     <name>LimaPerkinElmer</name>
     <description>This module controls the PerkinElmer Camera</description>
 	
-	<properties>
-       <MY_XIS_ROOT>T:\LimaCompilWin32\XIS\SDK32</MY_XIS_ROOT>
-	</properties>
-	
 	<dependencies>
 		<dependency>
 			<groupId>fr.soleil.lib</groupId>
