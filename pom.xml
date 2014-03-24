@@ -21,6 +21,11 @@
 			<artifactId>LimaCore-${aol}-shared-${mode}</artifactId>
 			<version>1.3.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.perkinelmer</groupId>
+			<artifactId>XISL-${aol}-shared-${mode}</artifactId>
+			<version>4.0</version>
+		</dependency>
 	</dependencies>
 
     <build>
@@ -34,7 +39,6 @@
 						<sourceDirectory>src</sourceDirectory>
 						<includePaths>
 							<includePath>include</includePath>
-							<includePath>sdk/msvc/include</includePath>
 						</includePaths>
 						<defines>
 							<define>LIBPERKINELMER_EXPORTS</define>
@@ -45,15 +49,6 @@
 							<define>_WIN32_WINNT=0x0502</define> <!-- For Windows XP Support -->
 						</defines>
 					</cpp>
-					<linker>
-						<libs>
-							<lib>
-								<name>xisl</name>
-								<type>static</type>
-								<directory>sdk/msvc/bin</directory>
-							</lib>
-						</libs>
-					</linker>
 					<libraries>
 						<library>
 							<type>shared</type>
