@@ -1,3 +1,5 @@
+.. _camera-perkinelmer:
+
 .. toctree::
   :maxdepth: 3
 
