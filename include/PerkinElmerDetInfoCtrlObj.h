@@ -22,7 +22,7 @@
 #ifndef PERKINELMERDETINFO_H
 #define PERKINELMERDETINFO_H
 #include "PerkinElmerCompatibility.h"
-#include "HwDetInfoCtrlObj.h"
+#include "lima/HwDetInfoCtrlObj.h"
 
 namespace lima
 {
