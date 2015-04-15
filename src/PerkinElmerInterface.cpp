@@ -26,8 +26,8 @@
 #include "PerkinElmerBinCtrlObj.h"
 #include <Acq.h>
 
-#include <SinkTask.h>
-#include <TaskMgr.h>
+#include "processlib/SinkTask.h"
+#include "processlib/TaskMgr.h"
  
 using namespace lima;
 using namespace lima::PerkinElmer;

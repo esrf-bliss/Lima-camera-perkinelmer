@@ -21,9 +21,9 @@
 //###########################################################################
 #ifndef PERKINELMERINTERFACE_H
 #define PERKINELMERINTERFACE_H
-#include "Debug.h"
+#include "lima/Debug.h"
 #include "PerkinElmerCompatibility.h"
-#include "HwInterface.h"
+#include "lima/HwInterface.h"
 
 namespace lima
 {

@@ -22,7 +22,7 @@
 #ifndef PERKINELMERBINCTRLOBJ_H
 #define PERKINELMERBINCTRLOBJ_H
 #include "PerkinElmerCompatibility.h"
-#include "HwBinCtrlObj.h"
+#include "lima/HwBinCtrlObj.h"
 #include <Acq.h>
 #include "PerkinElmerInterface.h"
 namespace lima

@@ -22,7 +22,7 @@
 #ifndef PERKINELMERSYNCCTRLOBJ_H
 #define PERKINELMERSYNCCTRLOBJ_H
 #include "PerkinElmerCompatibility.h"
-#include "HwSyncCtrlObj.h"
+#include "lima/HwSyncCtrlObj.h"
 
 #include "PerkinElmerInterface.h"
 namespace lima
