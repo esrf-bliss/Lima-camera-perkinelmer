@@ -33,7 +33,7 @@ namespace lima
     {
       DEB_CLASS_NAMESPC(DebModCamera,"BinCtrlObj","PerkinElmer");
     public:
-      BinCtrlObj(HANDLE&);
+      BinCtrlObj(HANDLE&, unsigned int);
       virtual ~BinCtrlObj();
 
       virtual void setBin(const Bin& bin);
@@ -41,6 +41,7 @@ namespace lima
       virtual void checkBin(Bin& bin);
     private:
       HANDLE& 	m_acq_desc;
+      unsigned int camera_type;
     };
   }
 }

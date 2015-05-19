@@ -79,7 +79,8 @@ namespace lima
       enum AcqMode {Normal,Offset,Gain};
 
       void _InitDetector(unsigned int &max_columns,
-			 unsigned int &max_rows);
+			 unsigned int &max_rows,
+			 unsigned int &cam_type);
 
       HANDLE 		m_acq_desc;
       DetInfoCtrlObj* 	m_det_info;
