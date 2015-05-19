@@ -76,6 +76,14 @@ Interface::Interface() :
   m_bin = new BinCtrlObj(m_acq_desc, cam_type);
 
   // TMP Double Buffer
+  
+
+  // FS 02.Apr.2015: Added to see the dimensions at this point
+  //DEB_ALWAYS() << "Before allocating m_tmp_buffer";
+  //DEB_ALWAYS() << "m_max_columns = " << DEB_VAR1(m_max_columns);
+  //DEB_ALWAYS() << "m_max_rows = " << DEB_VAR1(m_max_rows);
+
+
   m_tmp_buffer = _aligned_malloc(m_max_columns * m_max_rows * sizeof(unsigned short) * 2,16);
 
   if(Acquisition_SetCallbacksAndMessages(m_acq_desc, NULL, 0,
