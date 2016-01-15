@@ -68,12 +68,22 @@ Interface::Interface() :
 {
   DEB_CONSTRUCTOR();
 
-  _InitDetector(m_max_columns,m_max_rows);
+  unsigned int cam_type;
+  _InitDetector(m_max_columns,m_max_rows, cam_type);
   setGain(0);
   m_det_info = new DetInfoCtrlObj(m_acq_desc,m_max_rows,m_max_columns);
   m_sync = new SyncCtrlObj(m_acq_desc);
-  m_bin = new BinCtrlObj(m_acq_desc);
+  m_bin = new BinCtrlObj(m_acq_desc, cam_type);
+
   // TMP Double Buffer
+  
+
+  // FS 02.Apr.2015: Added to see the dimensions at this point
+  //DEB_ALWAYS() << "Before allocating m_tmp_buffer";
+  //DEB_ALWAYS() << "m_max_columns = " << DEB_VAR1(m_max_columns);
+  //DEB_ALWAYS() << "m_max_rows = " << DEB_VAR1(m_max_rows);
+
+
   m_tmp_buffer = _aligned_malloc(m_max_columns * m_max_rows * sizeof(unsigned short) * 2,16);
 
   if(Acquisition_SetCallbacksAndMessages(m_acq_desc, NULL, 0,
@@ -97,7 +107,7 @@ Interface::~Interface()
   _aligned_free(m_tmp_buffer);
 }
 
-void Interface::_InitDetector(unsigned int &max_columns,unsigned int &max_rows)
+void Interface::_InitDetector(unsigned int &max_columns,unsigned int &max_rows, unsigned int &cam_type)
 {
   DEB_MEMBER_FUNCT();
 
@@ -114,6 +124,18 @@ void Interface::_InitDetector(unsigned int &max_columns,unsigned int &max_rows)
   if(!get_channel_type_n_id(m_acq_desc,channel_type,channel_id))
     THROW_HW_ERROR(Error) << "Can't get channel type and number";
   DEB_ALWAYS() << "Acquisition board:" << DEB_VAR2(channel_type,channel_id);
+
+
+  // FS 02.Apr.2015: Added next 2 calls to get Camera Type
+  CHwHeaderInfo hInfo;
+  if(Acquisition_GetHwHeaderInfo(m_acq_desc,&hInfo) != HIS_ALL_OK)
+    THROW_HW_ERROR(Error) << "Can't get hw header info";
+
+  CHwHeaderInfoEx hInfoEx;
+  if(Acquisition_GetHwHeaderInfoEx(m_acq_desc, &hInfo, &hInfoEx) != HIS_ALL_OK)
+    THROW_HW_ERROR(Error) << "Can't get hw header extended info";
+  DEB_ALWAYS() << "Camera type:" << DEB_VAR1(hInfoEx.wCameratype);
+  cam_type = hInfoEx.wCameratype;
 
   //Reset Binning
   if(Acquisition_SetCameraBinningMode(m_acq_desc,1) != HIS_ALL_OK)
@@ -148,16 +170,43 @@ void Interface::reset(ResetLevel reset_level)
 
 void Interface::prepareAcq()
 {
+
   DEB_MEMBER_FUNCT();
 
   StdBufferCbMgr& buffer_mgr = m_buffer_ctrl_obj.getBuffer();
   const Size& aSize = buffer_mgr.getFrameDim().getSize();
 
+
+  // FS 02.Apr.2015: Added to see dimensions at this point
+  //DEB_ALWAYS() << "Height = " << DEB_VAR1(aSize.getHeight());
+  //DEB_ALWAYS() << "Width  = " << DEB_VAR1(aSize.getWidth());
+
+
   if(Acquisition_DefineDestBuffers(m_acq_desc,
 				   (unsigned short*)m_tmp_buffer,
 				   2,
-				   aSize.getHeight(),aSize.getWidth()) != HIS_ALL_OK)
+				   aSize.getHeight(),aSize.getWidth()) != HIS_ALL_OK) {
+    
+	//FS 2.Apr.2015 Added to see which error is returned
+    DWORD dwHISError;
+    DWORD dwBoardError;
+    if(Acquisition_GetErrorCode(m_acq_desc, &dwHISError, &dwBoardError) != HIS_ALL_OK)
+      THROW_HW_ERROR(Error) << "Unable to get error codes";
+    DEB_ALWAYS() << "dwHISError = " << dwHISError;
+    DEB_ALWAYS() << "dwBoardError = " << dwBoardError;
+
     THROW_HW_ERROR(Error) << "Unable to register destination buffer";
+  }
+
+
+  // FS 02.Apr.2015: Added to see which error is returned
+  DWORD dwHISError;
+  DWORD dwBoardError;
+  if(Acquisition_GetErrorCode(m_acq_desc, &dwHISError, &dwBoardError) != HIS_ALL_OK)
+	THROW_HW_ERROR(Error) << "Unable to get error codes";
+  DEB_ALWAYS() << "dwHISError = " << dwHISError;
+  DEB_ALWAYS() << "dwBoardError = " << dwBoardError;
+
 
   m_total_acq_frames = m_acq_frame_nb = 0;
   m_first_thrown = false;
