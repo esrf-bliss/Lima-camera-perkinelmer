@@ -24,36 +24,34 @@
 
 #HAVE TO BE UNDER WINDOWS
 if(WIN32)
+	set(NAME "perkinelmer")
 
-	set(perkinelmer_srcs src/PerkinElmerInterface.cpp src/PerkinElmerDetInfoCtrlObj.cpp
+	set(${NAME}_srcs src/PerkinElmerInterface.cpp src/PerkinElmerDetInfoCtrlObj.cpp
 					src/PerkinElmerSyncCtrlObj.cpp src/PerkinElmerBinCtrlObj.cpp)
 
-	file(STRINGS "VERSION" perkinelmer_ver)
-	add_library(limaperkinelmer SHARED ${perkinelmer_srcs})
+	add_library(limap${NAME} SHARED ${${NAME}_srcs})
 
-	target_include_directories(limaperkinelmer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-	target_include_directories(limaperkinelmer PUBLIC "C:/XIS/SDK32")
+	target_include_directories(lima${NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+	target_include_directories(lima${NAME} PUBLIC "C:/XIS/SDK32")
 	
-	target_compile_definitions(limaperkinelmer PRIVATE LIBPERKINELMER_EXPORTS)
+	target_compile_definitions(lima${NAME} PRIVATE LIBPERKINELMER_EXPORTS)
 	
-	find_library(PERKIN_LIB_XISL XISL "C:/XIS/SDK32")
+	find_library(PERKIN_XISL_LIB XISL "C:/XIS/SDK32")
 
-	if("${PERKIN_LIB_XISL}" STREQUAL "PERKIN_LIB_XISL-NOTFOUND")
-	  message(FATAL_ERROR "perkin elmer : XISL lib not found, you can search it in cmake-gui or try to install it if it isn't here.")
+	if("${PERKIN_XISL_LIB}" STREQUAL "PERKIN_XISL_LIB-NOTFOUND")
+	  message(FATAL_ERROR "${NAME} : XISL lib not found, you can search it in cmake-gui or try to install it if it isn't here.")
 	endif()
 
 
 
-	target_link_libraries(limaperkinelmer limacore)
-	target_link_libraries(limaperkinelmer ${PERKIN_LIB_XISL})
+	target_link_libraries(lima${NAME} limacore)
+	target_link_libraries(lima${NAME} ${PERKIN_LIB_XISL})
 
+	include(CameraVERSION)
+    set_target_properties(lima${NAME} PROPERTIES PREFIX "lib")
+    install(TARGETS lima${NAME} DESTINATION lib)
 
-	set_target_properties(limaperkinelmer PROPERTIES VERSION ${perkinelmer_ver} SOVERSION "1")
-    set_target_properties(limaperkinelmer PROPERTIES PREFIX "lib")
-    install(TARGETS limaperkinelmer DESTINATION lib)
-
-	if(COMPILE_SIP)
-		set(NAME "perkinelmer")
+	if(LIMA_ENABLE_PYTHON)
 		include(CameraRunSIP)
 		install(FILES python/__init__.py DESTINATION "${PYTHON_SITE_PACKAGES_DIR}/Lima/PerkinElmer")
 	endif()
