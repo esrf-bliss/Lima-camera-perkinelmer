@@ -29,7 +29,7 @@ if(WIN32)
 	set(${NAME}_srcs src/PerkinElmerInterface.cpp src/PerkinElmerDetInfoCtrlObj.cpp
 					src/PerkinElmerSyncCtrlObj.cpp src/PerkinElmerBinCtrlObj.cpp)
 
-	add_library(limap${NAME} SHARED ${${NAME}_srcs})
+	add_library(lima${NAME} SHARED ${${NAME}_srcs})
 
 	target_include_directories(lima${NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 	target_include_directories(lima${NAME} PUBLIC "C:/XIS/SDK32")
