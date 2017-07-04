@@ -45,7 +45,7 @@ if(WIN32)
 
 
 	target_link_libraries(lima${NAME} limacore)
-	target_link_libraries(lima${NAME} ${PERKIN_LIB_XISL})
+	target_link_libraries(lima${NAME} ${PERKIN_XISL_LIB})
 
 	limatools_set_library_soversion(lima${NAME} "VERSION")
     set_target_properties(lima${NAME} PROPERTIES PREFIX "lib")
