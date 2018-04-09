@@ -11,41 +11,26 @@ Perkin Elmer camera
 
 Intoduction
 ```````````
-PerkinElmer is a world leader in the design, development, and manufacture of Amorphous Silicon (aSi) Flat Panel Detectors (FPD) designed to perform across a wide range of medical, veterinary, and industrial, Non-Destructive Testing (NDT) applications. Our XRD family of detectors provide superior image resolution, high frame rates up to 30 frames per seconds (fps), energy levels form 20 keV -15 MeV and easy information storage and retrieval.
+
+  "PerkinElmer is a world leader in the design, development, and manufacture of Amorphous Silicon (aSi) Flat Panel Detectors (FPD) designed to perform across a wide range of medical, veterinary, and industrial, Non-Destructive Testing (NDT) applications. Our XRD family of detectors provide superior image resolution, high frame rates up to 30 frames per seconds (fps), energy levels form 20 keV -15 MeV and easy information storage and retrieval."
 
 The detector model we tested (ESRF) is : XRD 1621 CN ES
- 
+
 Prerequisite Windows 7
 ``````````````````````
-Previously to this you have to install the Perkinelmer Windows7 SDK to the default path.
 
+First, you have to install the Perkinelmer Windows7 SDK to the default path.
 
 Installation & Module configuration
-````````````````````````````````````
+```````````````````````````````````
 
--  follow first the steps for the linux installation :ref:`linux_installation`
-
-The minimum configuration file is *config.inc* :
+Follow the generic instructions in :ref:`build_installation`. If using CMake directly, add the following flag:
 
 .. code-block:: sh
 
-  COMPILE_CORE=1
-  COMPILE_SIMULATOR=0
-  COMPILE_SPS_IMAGE=1
-  COMPILE_ESPIA=0
-  COMPILE_FRELON=0
-  COMPILE_MAXIPIX=0
-  COMPILE_PILATUS=-1
-  COMPILE_PERKINELMER=1
-  COMPILE_CBF_SAVING=0
-  export COMPILE_CORE COMPILE_SPS_IMAGE COMPILE_SIMULATOR \
-         COMPILE_ESPIA COMPILE_FRELON COMPILE_MAXIPIX COMPILE_PILATUS \
-         COMPILE_PERKINELMER COMPILE_CBF_SAVING
+ -DLIMACAMERA_PERKINELMER=true
 
-
--  start the compilation :ref:`linux_compilation`
-
--  finally for the Tango server installation :ref:`tango_installation`
+For the Tango server installation, refers to :ref:`tango_installation`.
 
 Initialisation and Capabilities
 ````````````````````````````````
@@ -53,10 +38,10 @@ Initialisation and Capabilities
 Camera initialisation
 ......................
 
-The camera will be initialized  by created the PerkinElmer::Interface object. The contructor
+The camera will be initialized  by created the :cpp:class:`PerkinElmer::Interface` object. The contructor
 will take care of your detector configuration according to the SDK installation setup done before.
 
-Std capabilites
+Std capabilities
 ................
 
 This plugin has been implement in respect of the mandatory capabilites but with some limitations which
@@ -64,7 +49,7 @@ are due to the camera and SDK features.  We provide here further information for
 of the detector specific capabilities.
 
 * HwDetInfo
-  
+
   getCurrImageType/getDefImageType():  Bpp16 only.
 
   setCurrImageType(): this method do not change the image type which is fixed to Bpp16.
@@ -72,14 +57,15 @@ of the detector specific capabilities.
 * HwSync
 
   get/setTrigMode(): the supported mode are IntTrig, ExtStartStop, ExtTrigReadout
-  
-Optional capabilites
-........................
+
+Optional capabilities
+.....................
+
 In addition to the standard capabilities, we make the choice to implement some optional capabilities which
 are supported by the SDK and the I-Kon cameras. A Shutter control, a hardware ROI and a hardware Binning are available.
 
-* HwBin 
-  
+* HwBin
+
   Some camera models support binning 4x4, 2x2, 4x2 4x2 and 1x1  and others support only 2x2.
   Camera type si provided when initing the sdk (_InitDetector()) and only camera of type 15 supports
   the long range of binning.
@@ -87,11 +73,11 @@ are supported by the SDK and the I-Kon cameras. A Shutter control, a hardware RO
 Configuration
 `````````````
 
- - Nothing special to do, but read the manual for proper installation. 
-
+ - Nothing special to do, but read the manual for proper installation.
 
 How to use
-````````````
+``````````
+
 This is a python code example for a simple test:
 
 .. code-block:: python
@@ -104,7 +90,7 @@ This is a python code example for a simple test:
 
   acq = ct.acquisition()
 
-  # set offset and gain calibration, one image 1.0 second exposure 
+  # set offset and gain calibration, one image 1.0 second exposure
   hwint.startAcqOffsetImage(1, 1.0)
   hwint.startAcqGainImage(1, 1.0)
 
@@ -140,8 +126,8 @@ This is a python code example for a simple test:
 
   # now ask for 2 sec. exposure and 10 frames
   acq.setAcqExpoTime(2)
-  acq.setNbImages(10) 
-  
+  acq.setNbImages(10)
+
   ct.prepareAcq()
   ct.startAcq()
 
@@ -150,7 +136,6 @@ This is a python code example for a simple test:
   while lastimg !=9:
     time.sleep(1)
     lastimg = ct.getStatus().ImageCounters.LastImageReady
- 
+
   # read the first image
   im0 = ct.ReadImage(0)
-
