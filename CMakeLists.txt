@@ -32,11 +32,11 @@ if(WIN32)
 	add_library(lima${NAME} SHARED ${${NAME}_srcs})
 
 	target_include_directories(lima${NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-	target_include_directories(lima${NAME} PUBLIC "C:/XIS/SDK32")
+	target_include_directories(lima${NAME} PUBLIC "C:/XIS/SDK64")
 	
 	target_compile_definitions(lima${NAME} PRIVATE LIBPERKINELMER_EXPORTS)
 	
-	find_library(PERKIN_XISL_LIB XISL "C:/XIS/SDK32")
+	find_library(PERKIN_XISL_LIB XISL "C:/XIS/SDK64")
 
 	if("${PERKIN_XISL_LIB}" STREQUAL "PERKIN_XISL_LIB-NOTFOUND")
 	  message(FATAL_ERROR "${NAME} : XISL lib not found, you can search it in cmake-gui or try to install it if it isn't here.")

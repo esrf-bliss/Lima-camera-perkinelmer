@@ -36,14 +36,14 @@ using namespace lima::PerkinElmer;
 void CALLBACK lima::PerkinElmer::_OnEndAcqCallback(HANDLE handle)
 {
   Interface *anInterfacePt;
-  Acquisition_GetAcqData(handle,(DWORD*)(&anInterfacePt));
+  Acquisition_GetAcqData(handle,(void**)(&anInterfacePt));
   anInterfacePt->SetEndAcquisition();
 }
 
 void CALLBACK lima::PerkinElmer::_OnEndFrameCallback(HANDLE handle)
 {
   Interface *anInterfacePt;
-  Acquisition_GetAcqData(handle,(DWORD*)(&anInterfacePt));
+  Acquisition_GetAcqData(handle,(void**)(&anInterfacePt));
   anInterfacePt->newFrameReady();
 }
 // _StopAcq
@@ -90,7 +90,7 @@ Interface::Interface() :
 					 0, _OnEndFrameCallback, _OnEndAcqCallback) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Could not set callback";
   
-  if(Acquisition_SetAcqData(m_acq_desc,(DWORD)this) != HIS_ALL_OK)
+  if(Acquisition_SetAcqData(m_acq_desc,(void*)this) != HIS_ALL_OK)
     THROW_HW_ERROR(Error) << "Unable to register Acq Data";
 
   m_cap_list.push_back(HwCap(m_det_info));
