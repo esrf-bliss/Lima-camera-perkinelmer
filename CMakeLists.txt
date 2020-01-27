@@ -53,18 +53,11 @@ if (CAMERA_MASTER_PROJECT)
   find_package(Lima REQUIRED COMPONENTS devel tools)
 endif()
 
-find_library(PERKIN_XISL_LIB NAMES XISL
-  PATHS "C:/XIS/SDK64"
-  NO_CMAKE_FIND_ROOT_PATH
-  NO_DEFAULT_PATH)
-
-if("${PERKIN_XISL_LIB}" STREQUAL "PERKIN_XISL_LIB-NOTFOUND")
-  message(FATAL_ERROR "${NAME} : XISL lib not found")
-endif()
-
-
 # CMake additional macros
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${LIMA_CMAKE_INCLUDE_DIRS} ${CMAKE_MODULE_PATH})
+
+# Find the SDK XISL
+find_package(XISL REQUIRED)
 
 include(LimaTools)
 
@@ -108,11 +101,11 @@ target_include_directories(perkinelmer
     PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"           # For export header
     PUBLIC "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
-target_include_directories(perkinelmer PUBLIC "C:/XIS/SDK64")
+target_include_directories(perkinelmer PUBLIC ${XISL_INCLUDE_DIRS})
 
 target_link_libraries(perkinelmer PUBLIC limacore)
 
-target_link_libraries(perkinelmer PUBLIC ${PERKIN_XISL_LIB})
+target_link_libraries(perkinelmer PUBLIC ${XISL_LIBRARIES})
 
 
 if(WIN32)

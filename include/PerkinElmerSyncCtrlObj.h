@@ -1,7 +1,7 @@
 //###########################################################################
 // This file is part of LImA, a Library for Image Acquisition
 //
-// Copyright (C) : 2009-2011
+// Copyright (C) : 2009-2020
 // European Synchrotron Radiation Facility
 // BP 220, Grenoble 38043
 // FRANCE
@@ -21,15 +21,16 @@
 //###########################################################################
 #ifndef PERKINELMERSYNCCTRLOBJ_H
 #define PERKINELMERSYNCCTRLOBJ_H
-#include "PerkinElmerCompatibility.h"
 #include "lima/HwSyncCtrlObj.h"
-
 #include "PerkinElmerInterface.h"
+
+#include <perkinelmer_export.h>
+
 namespace lima
 {
   namespace PerkinElmer
   {
-    class LIBPERKINELMER_API SyncCtrlObj : public HwSyncCtrlObj
+    class PERKINELMER_EXPORT SyncCtrlObj : public HwSyncCtrlObj
     {
       friend class Interface;
       DEB_CLASS_NAMESPC(DebModCamera, "SyncCtrlObj", "PerkinElmer");
