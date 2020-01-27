@@ -1,7 +1,7 @@
 //###########################################################################
 // This file is part of LImA, a Library for Image Acquisition
 //
-// Copyright (C) : 2009-2011
+// Copyright (C) : 2009-2020
 // European Synchrotron Radiation Facility
 // BP 220, Grenoble 38043
 // FRANCE
@@ -22,8 +22,9 @@
 #ifndef PERKINELMERINTERFACE_H
 #define PERKINELMERINTERFACE_H
 #include "lima/Debug.h"
-#include "PerkinElmerCompatibility.h"
 #include "lima/HwInterface.h"
+
+#include <perkinelmer_export.h>
 
 namespace lima
 {
@@ -35,7 +36,7 @@ namespace lima
     void CALLBACK _OnEndFrameCallback(HANDLE);
     void CALLBACK _OnEndAcqCallback(HANDLE);
 
-    class LIBPERKINELMER_API Interface : public HwInterface
+    class PERKINELMER_EXPORT Interface : public HwInterface
     {
       friend void CALLBACK _OnEndFrameCallback(HANDLE);
       friend void CALLBACK _OnEndAcqCallback(HANDLE);
@@ -98,7 +99,7 @@ namespace lima
       bool		m_first_thrown;
       int		m_total_acq_frames;
     };
-    LIBPERKINELMER_API std::ostream& operator <<(std::ostream &os,Interface::CorrMode);
+    PERKINELMER_EXPORT std::ostream& operator <<(std::ostream &os,Interface::CorrMode);
   }
 }
 #endif

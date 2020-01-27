@@ -1,7 +1,7 @@
 //###########################################################################
 // This file is part of LImA, a Library for Image Acquisition
 //
-// Copyright (C) : 2009-2011
+// Copyright (C) : 2009-2020
 // European Synchrotron Radiation Facility
 // BP 220, Grenoble 38043
 // FRANCE
@@ -21,14 +21,15 @@
 //###########################################################################
 #ifndef PERKINELMERDETINFO_H
 #define PERKINELMERDETINFO_H
-#include "PerkinElmerCompatibility.h"
 #include "lima/HwDetInfoCtrlObj.h"
+
+#include <perkinelmer_export.h>
 
 namespace lima
 {
   namespace PerkinElmer
   {
-    class LIBPERKINELMER_API DetInfoCtrlObj : public HwDetInfoCtrlObj
+    class PERKINELMER_EXPORT DetInfoCtrlObj : public HwDetInfoCtrlObj
     {
       DEB_CLASS_NAMESPC(DebModCamera, "DetInfoCtrlObj", "PerkinElmer");
     public:

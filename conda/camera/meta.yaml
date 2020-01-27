@@ -21,6 +21,7 @@ requirements:
     - numpy
     - sip 4.19.8              # For compatibility with pyqt 5.9.2
     - lima-core
+    - perkinelmer-sdk
   build:
     - git
     - cmake
@@ -29,6 +30,7 @@ requirements:
     - python {{ python }}
     - sip >=4.19.4, <=4.19.8  # For compatibility with pyqt 5.9.2
     - {{ pin_compatible('lima-core', max_pin='x.x') }}
+    - perkinelmer-sdk
 
 test:
   requires:
