@@ -25,6 +25,7 @@ requirements:
   build:
     - git
     - cmake
+    - ninja
     - {{ compiler('cxx') }}
   run:
     - python {{ python }}
