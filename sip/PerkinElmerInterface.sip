@@ -53,6 +53,9 @@ public:
 
     void setKeepFirstImage(bool);
     bool getKeepFirstImage() const;
+private:
+    Interface(const PerkinElmer::Interface&);
+
   };
 };
 
