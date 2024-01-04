@@ -20,7 +20,7 @@ requirements:
   build:
     - cmake
     - ninja
-    - lima-core
+    - lima-core 1.9*
   run:
     - lima-tango-server
     - lima-camera-perkinelmer
