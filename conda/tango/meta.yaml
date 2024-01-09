@@ -22,7 +22,7 @@ requirements:
     - ninja
     - lima-core 1.9*
   run:
-    - lima-tango-server
+    - lima-tango-server 1.9*
     - lima-camera-perkinelmer
 
 about:
