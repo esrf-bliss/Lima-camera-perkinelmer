@@ -19,7 +19,7 @@ requirements:
   host:
     - python {{ python }}
     - sip 4.19* # API V12.7
-    - lima-core 1.9*
+    - lima-core 1.10*
     - perkinelmer-sdk >=33.7.206
   build:
     - cmake
@@ -27,8 +27,8 @@ requirements:
     - {{ compiler('cxx') }}
   run:
     - python {{ python }}
-    -  {{ pin_compatible('sip', min_pin='x.x.x', max_pin='x') }}
-    - {{ pin_compatible('lima-core', max_pin='x.x') }}
+    - {{ pin_compatible('sip', min_pin='x.x.x', max_pin='x') }}
+    - {{ pin_compatible('lima-core', min_pin='x.x', max_pin='x.x') }}
     - perkinelmer-sdk >=33.7.206
 
 test:
